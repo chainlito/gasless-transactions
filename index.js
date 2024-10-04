@@ -28,13 +28,21 @@ const main = async () => {
   const saAddress = await smartWallet.getAccountAddress();
   console.log("SA Address", saAddress);
 
-  const toAddress = "0xb7f79a67bD5BEE050547f9129D69B857297A9699"; // Replace with the recipient's address
+  const toAddress = process.env.UNISWAP_ROUTER_ADDRESS; // Replace with the recipient's address
   const transactionData = "0x123"; // Replace with the actual transaction data
   
+  // Encode Uniswap swap function call
+  const UniswapRouterInterface = new ethers.utils.Interface([
+    "function swapExactETHForTokens(uint256 amountOutMin, address[] path, address to, uint256 deadline)"
+  ]);
   // Build the transaction
   const tx = {
     to: toAddress,
-    data: transactionData,
+    data: UniswapRouterInterface.encodeFunctionData(
+      "swapExactETHForTokens",
+      [0, [process.env.WETH_ADDRESS, process.env.TOKEN_ADDRESS], saAddress, 1733089740]
+    ),
+    value: 200000000000000000
   };
 
   // Send the transaction and get the transaction hash
